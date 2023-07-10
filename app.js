@@ -87,60 +87,60 @@ const Message = mongoose.model('CollegeMessage', MessageSchema);
 
 
   // College login route
-  app.post('/college/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      const college = await College.findOne({ email, password });
-      if (!college) {
-        res.status(401).json({ error: 'Invalid credentials' });
-        return;
-      }
-      const token = jwt.sign({ id: college._id }, 'your_secret_key');
-      res.json({ token });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+app.post('/college/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const college = await College.findOne({ email, password });
+    if (!college) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
-  });
-  
-  // Company login route
-  app.post('/company/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      const company = await Company.findOne({ email, password });
-      if (!company) {
-        res.status(401).json({ error: 'Invalid credentials' });
-        return;
-      }
-      const token = jwt.sign({ id: company._id }, 'your_secret_key');
-      res.json({ token });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+    const token = jwt.sign({ id: college._id }, 'your_secret_key');
+    res.json({ id: college._id, token });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Company login route
+app.post('/company/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const company = await Company.findOne({ email, password });
+    if (!company) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
-  });
-  
-  // College register route
-  app.post('/college/register', async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-      const college = new College({ name, email, password });
-      await college.save();
-      res.json({ message: 'College registered successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-  
-  // Company register route
-  app.post('/company/register', async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-      const company = new Company({ name, email, password });
-      await company.save();
-      res.json({ message: 'Company registered successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
+    res.json({ id: company._id });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// College register route
+app.post('/college/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const college = new College({ name, email, password });
+    await college.save();
+    res.json({ id: college._id, message: 'College registered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Company register route
+app.post('/company/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const company = new Company({ name, email, password });
+    await company.save();
+    res.json({ id: company._id, message: 'Company registered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
   // College details route
 app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) => {
   const { state, city, description,mobile } = req.body;
