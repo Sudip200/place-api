@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const multer = require('multer');
-
+const path = require('path');
 // Set up the Express app
 const app = express();
 
@@ -28,6 +28,20 @@ mongoose.connect('mongodb+srv://dassudipto200:B8sRC8IqhLHvJzP2@cluster0.c0ugejs.
 }).catch((error) => {
   console.error('Error connecting to MongoDB:', error);
 });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/uploads');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extname = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + extname);
+  }
+});
+
+// Create the Multer upload object
+app.use(express.static(path.join(__dirname, 'public')));
+const upload = multer({ storage });
 const College = mongoose.model('College', new mongoose.Schema({
     name: String,
     email: String,
@@ -44,6 +58,7 @@ const College = mongoose.model('College', new mongoose.Schema({
     state: String,
     city: String,
     description: String,
+    mobile:Number,
     logo: String,
     college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' }
   });
@@ -53,11 +68,24 @@ const College = mongoose.model('College', new mongoose.Schema({
     state: String,
     city: String,
     description: String,
+    mobile:Number,
     logo: String,
     company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
   });
   
   const CompanyDetails = mongoose.model('CompanyDetails', CompanyDetailsSchema);
+  // CollegeMessageSchema model
+  const MessageSchema = new mongoose.Schema({
+    message: String,
+    college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
+  }, { timestamps: true });
+  
+
+const Message = mongoose.model('CollegeMessage', MessageSchema);
+
+
+
   // College login route
   app.post('/college/login', async (req, res) => {
     const { email, password } = req.body;
@@ -113,6 +141,129 @@ const College = mongoose.model('College', new mongoose.Schema({
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  // College details route
+app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) => {
+  const { state, city, description,mobile } = req.body;
+  const { collegeId } = req.params;
+
+  try {
+    const collegeDetails = new CollegeDetails({
+      state,
+      city,
+      description,
+      mobile,
+      logo: req.file.filename,
+      college: collegeId
+    });
+    await collegeDetails.save();
+    res.json({ message: 'College details created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Company details route
+app.post('/company/details/:companyId', upload.single('logo'), async (req, res) => {
+  const { state, city, description } = req.body;
+  const { companyId } = req.params;
+
+  try {
+    const companyDetails = new CompanyDetails({
+      state,
+      city,
+      description,
+      logo: req.file.filename.replace('public',''),
+      company: companyId
+    });
+    await companyDetails.save();
+    res.json({ message: 'Company details created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+// Get details of a specific company
+app.get('/company/details/:companyId', async (req, res) => {
+  const { companyId } = req.params;
+   console.log(companyId)
+  try {
+    const companyDetails = await CompanyDetails.findOne({ company: companyId }).populate('company');
+    if (!companyDetails) {
+      res.status(404).json({ error: 'Company details not found' });
+      return;
+    }
+    res.json(companyDetails);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get details of a specific college
+app.get('/college/details/:collegeId', async (req, res) => {
+  const { collegeId } = req.params;
+
+  try {
+    const collegeDetails = await CollegeDetails.findOne({ college: collegeId }).populate('college');
+    if (!collegeDetails) {
+      res.status(404).json({ error: 'College details not found' });
+      return;
+    }
+    res.json(collegeDetails);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all company details
+app.get('/company/details', async (req, res) => {
+  try {
+    const companyDetails = await Company.find();
+    res.json(companyDetails);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all college details
+app.get('/college/details', async (req, res) => {
+  try {
+    const collegeDetails = await College.find();
+    res.json(collegeDetails);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+app.post('/messages', async (req, res) => {
+  const { message, collegeId, companyId } = req.body;
+
+  try {
+    const newMessage = new Message({
+      message,
+      college: collegeId,
+      company: companyId
+    });
+    await newMessage.save();
+    res.json({ message: 'Message created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+// Get messages between two IDs
+// Get messages between two IDs
+app.get('/messages/:collegeId/:companyId', async (req, res) => {
+  const { collegeId, companyId } = req.params;
+
+  try {
+    const messages = await Message.find({
+      college: collegeId,
+      company: companyId
+    }).sort({ timestamp: 'asc' });
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Define your routes here
 app.get('/', (req, res) => {
   res.send('Hello, world!');
