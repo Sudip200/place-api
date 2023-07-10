@@ -249,8 +249,11 @@ app.post('/messages', async (req, res) => {
 });
 // Get messages between two IDs
 // Get messages between two IDs
-app.get('/messages/:collegeId/:companyId', async (req, res) => {
-  const { collegeId, companyId } = req.params;
+app.get('/messages', async (req, res) => {
+  const collegeId = req.query.collegeId;
+  const companyId = req.query.companyId;
+
+  console.log(collegeId+   +companyId)
 
   try {
     const messages = await Message.find({
