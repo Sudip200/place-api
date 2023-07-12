@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const cors=require('cors');
 const path = require('path');
 // Set up the Express app
 const app = express();
@@ -13,6 +14,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(cors());
 app.use(session({
   secret: 'sdhello102',
   resave: false,
