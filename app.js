@@ -123,6 +123,11 @@ app.post('/company/login', async (req, res) => {
 app.post('/college/register', async (req, res) => {
   const { name, email, password } = req.body;
   try {
+    const existingCollege = await College.findOne({ email });
+    if (existingCollege) {
+      res.status(400).json({ error: 'exists' });
+      return;
+    }
     const college = new College({ name, email, password });
     await college.save();
     res.json({ id: college._id, message: 'College registered successfully' });
@@ -135,6 +140,11 @@ app.post('/college/register', async (req, res) => {
 app.post('/company/register', async (req, res) => {
   const { name, email, password } = req.body;
   try {
+    const existingCom = await Company.findOne({ email });
+    if (existingCom) {
+      res.status(400).json({ error: 'exists' });
+      return;
+    }
     const company = new Company({ name, email, password });
     await company.save();
     res.json({ id: company._id, message: 'Company registered successfully' });
