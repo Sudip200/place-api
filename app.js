@@ -230,7 +230,7 @@ app.get('/college/details/:collegeId', async (req, res) => {
 // Get all company details
 app.get('/company/details', async (req, res) => {
   try {
-    const companyDetails = await Company.find();
+    const companyDetails = await CompanyDetails.find().populate('company');
     res.json(companyDetails);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -240,7 +240,7 @@ app.get('/company/details', async (req, res) => {
 // Get all college details
 app.get('/college/details', async (req, res) => {
   try {
-    const collegeDetails = await College.find();
+    const collegeDetails = await CollegeDetails.find().populate('college');
     res.json(collegeDetails);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
