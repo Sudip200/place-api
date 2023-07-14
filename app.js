@@ -45,37 +45,39 @@ const storage = multer.diskStorage({
 app.use(express.static(path.join(__dirname, 'public')));
 const upload = multer({ storage });
 const College = mongoose.model('College', new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String
-  }));
-  
-  // CompanySchema model
-  const Company = mongoose.model('Company', new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String
-  }));
-  const CollegeDetailsSchema = new mongoose.Schema({
-    state: String,
-    city: String,
-    description: String,
-    mobile:Number,
-    logo: String,
-    college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' }
-  });
-  
-  const CollegeDetails = mongoose.model('CollegeDetails', CollegeDetailsSchema);
-  const CompanyDetailsSchema = new mongoose.Schema({
-    state: String,
-    city: String,
-    description: String,
-    mobile:Number,
-    logo: String,
-    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
-  });
-  
-  const CompanyDetails = mongoose.model('CompanyDetails', CompanyDetailsSchema);
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true }
+}));
+
+const Company = mongoose.model('Company', new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true }
+}));
+
+const CollegeDetailsSchema = new mongoose.Schema({
+  state: { type: String, required: true },
+  city: { type: String, required: true },
+  description: { type: String, required: true },
+  mobile: { type: Number, required: true },
+  logo: { type: String, required: true },
+  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College', required: true }
+});
+
+const CollegeDetails = mongoose.model('CollegeDetails', CollegeDetailsSchema);
+
+const CompanyDetailsSchema = new mongoose.Schema({
+  state: { type: String, required: true },
+  city: { type: String, required: true },
+  description: { type: String, required: true },
+  mobile: { type: Number, required: true },
+  logo: { type: String, required: true },
+  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true }
+});
+
+const CompanyDetails = mongoose.model('CompanyDetails', CompanyDetailsSchema);
+
   // CollegeMessageSchema model
   const MessageSchema = new mongoose.Schema({
     message: String,
