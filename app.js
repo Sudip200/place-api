@@ -172,13 +172,13 @@ app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) 
     await collegeDetails.save();
     res.json({ message: 'College details created successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({error:error });
   }
 });
 
 // Company details route
 app.post('/company/details/:companyId', upload.single('logo'), async (req, res) => {
-  const { state, city, description } = req.body;
+  const { state, city, description,mobile } = req.body;
   const { companyId } = req.params;
 
   try {
@@ -186,13 +186,14 @@ app.post('/company/details/:companyId', upload.single('logo'), async (req, res) 
       state,
       city,
       description,
-      logo: req.file.filename.replace('public',''),
+      mobile,
+      logo: req.file.filename,
       company: companyId
     });
     await companyDetails.save();
     res.json({ message: 'Company details created successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error:error});
   }
 });
 // Get details of a specific company
