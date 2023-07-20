@@ -90,7 +90,7 @@ const Message = mongoose.model('CollegeMessage', MessageSchema);
 
 const StudentSchema = new mongoose.Schema({
   name: { required: true, type: String },
-  open: { required: false, type: Boolean },
+  open: { required: false, type: String },
   college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
   skill: { type: [String], required: true },
   email: { type: String, required: true },
@@ -99,7 +99,7 @@ const StudentSchema = new mongoose.Schema({
   description: { type: String, required: false },
   resume: { data: Buffer, contentType: String }
 });
-
+const Student = mongoose.model('Student', StudentSchema);
 
   // College login route
 app.post('/college/login', async (req, res) => {
@@ -296,8 +296,11 @@ app.post('/register/:collegeId', upload.single('resume'), async (req, res) => {
   try {
     const { name, open, skill, email, password, mobile, description } = req.body;
     const collegeId = req.params.collegeId;
-    const resumeData = req.file; // The uploaded file information
-
+    const resumeData = req.file;
+     // The uploaded file information
+     
+     console.log(req.file)
+     console.log(req.body)
     // Create a new student instance
     const student = new Student({
       name,
@@ -319,7 +322,7 @@ app.post('/register/:collegeId', upload.single('resume'), async (req, res) => {
 
     res.status(201).json({ id:student._id});
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred while registering the student' });
+    res.status(500).json({ error: error });
   }
 });
 app.post('/login/:collegeId', async (req, res) => {
