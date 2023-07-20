@@ -9,7 +9,7 @@ const cors=require('cors');
 const path = require('path');
 // Set up the Express app
 const app = express();
-
+app.set('view engine','ejs');
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -88,6 +88,17 @@ const CompanyDetails = mongoose.model('CompanyDetails', CompanyDetailsSchema);
 
 const Message = mongoose.model('CollegeMessage', MessageSchema);
 
+const StudentSchema = new mongoose.Schema({
+  name: { required: true, type: String },
+  open: { required: false, type: Boolean },
+  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
+  skill: { type: [String], required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+  mobile: { type: Number, required: false },
+  description: { type: String, required: false },
+  resume: { data: Buffer, contentType: String }
+});
 
 
   // College login route
@@ -281,7 +292,66 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+app.post('/register/:collegeId', upload.single('resume'), async (req, res) => {
+  try {
+    const { name, open, skill, email, password, mobile, description } = req.body;
+    const collegeId = req.params.collegeId;
+    const resumeData = req.file; // The uploaded file information
 
+    // Create a new student instance
+    const student = new Student({
+      name,
+      open,
+      college: collegeId,
+      skill,
+      email,
+      password,
+      mobile,
+      description,
+      resume: {
+        data: resumeData.buffer, // Store the file buffer
+        contentType: resumeData.mimetype, // Store the file content type
+      },
+    });
+
+    // Save the student to the database
+    await student.save();
+
+    res.status(201).json({ id:student._id});
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while registering the student' });
+  }
+});
+app.post('/login/:collegeId', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const collegeId = req.params.collegeId;
+
+    // Check if the student exists in the given college
+    const student = await Student.findOne({ email, college: collegeId });
+
+    if (!student) {
+      res.status(404).json({ error: 'Student not found' });
+    } else {
+      if (student.password === password) {
+        res.status(200).json({ message: 'Login successful' });
+      } else {
+        res.status(401).json({ error: 'Invalid password' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while logging in' });
+  }
+});
+app.get('/register/:collegeId', async (req, res) => {
+  const collegeId = req.params.collegeId;
+  const college= await CollegeDetails.findOne({college:collegeId}).populate('college')
+  if (!college) {
+    return res.status(404).send('<h1>College not found</h1>');
+  }
+
+  res.render('register', { collegeId,college });
+});
 // Define your routes here
 app.get('/', (req, res) => {
   res.send('Hello, world!');
