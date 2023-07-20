@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cors=require('cors');
 const path = require('path');
+const fs =require('fs')
 // Set up the Express app
 const app = express();
 app.set('view engine','ejs');
@@ -89,15 +90,16 @@ const CompanyDetails = mongoose.model('CompanyDetails', CompanyDetailsSchema);
 const Message = mongoose.model('CollegeMessage', MessageSchema);
 
 const StudentSchema = new mongoose.Schema({
+  profile:{required:true,type:String},
   name: { required: true, type: String },
   open: { required: false, type: String },
-  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
-  skill: { type: [String], required: true },
+  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College', required: true },
+  skill: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
   mobile: { type: Number, required: false },
   description: { type: String, required: false },
-  resume: { data: Buffer, contentType: String }
+  resume: {required:true,type:String  }
 });
 const Student = mongoose.model('Student', StudentSchema);
 
@@ -188,7 +190,7 @@ app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) 
 });
 
 // Company details route
-app.post('/company/details/:companyId', upload.single('logo'), async (req, res) => {
+app.post('/company/details/:companyId',upload.single('logo'), async (req, res) => {
   const { state, city, description,mobile } = req.body;
   const { companyId } = req.params;
 
@@ -292,11 +294,12 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-app.post('/register/:collegeId', upload.single('resume'), async (req, res) => {
+app.post('/register/:collegeId', upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'profile', maxCount: 1 }]), async (req, res) => {
   try {
     const { name, open, skill, email, password, mobile, description } = req.body;
     const collegeId = req.params.collegeId;
-    const resumeData = req.file;
+    const resumeData = req.files['resume'][0];
+    const profileData=req.files['profile'][0]
      // The uploaded file information
      
      console.log(req.file)
@@ -311,10 +314,8 @@ app.post('/register/:collegeId', upload.single('resume'), async (req, res) => {
       password,
       mobile,
       description,
-      resume: {
-        data: resumeData.buffer, // Store the file buffer
-        contentType: resumeData.mimetype, // Store the file content type
-      },
+      resume:resumeData.filename,
+      profile:profileData.filename
     });
 
     // Save the student to the database
