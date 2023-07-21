@@ -360,6 +360,14 @@ app.get('/register/:collegeId', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+app.get('/allstudents',async (req,res)=>{
+ try{
+   const students=await Student.find({}).populate('college');
+   res.json(students);
+ }catch(err){
+
+ }
+})
 
 // Start the server
 const port = 3000;
