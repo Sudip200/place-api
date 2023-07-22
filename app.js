@@ -175,44 +175,63 @@ app.post('/company/register', async (req, res) => {
 });
 
   // College details route
-app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) => {
-  const { state, city, description,mobile } = req.body;
-  const { collegeId } = req.params;
-
-  try {
-    const collegeDetails = new CollegeDetails({
-      state,
-      city,
-      description,
-      mobile,
-      logo: req.file.filename,
-      college: collegeId
-    });
-    await collegeDetails.save();
-    res.json({ message: 'College details created successfully' });
-  } catch (error) {
-    res.status(500).json({error:error });
-  }
-});
-
+  app.post('/college/details/:collegeId', uploads.single('logo'), async (req, res) => {
+    const { state, city, description, mobile } = req.body;
+    const { collegeId } = req.params;
+  
+    try {
+      // Upload the logo file to S3
+      const logoParams = {
+        Bucket: "uploadfiles200",
+        Key: `${Date.now()}_${req.file.originalname}`,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype, // Set Content-Type based on file type
+      };
+      const logoUploadResult = await s3.upload(logoParams).promise();
+  
+      const collegeDetails = new CollegeDetails({
+        state,
+        city,
+        description,
+        mobile,
+        logo: logoUploadResult.Location, // Save the S3 URL
+        college: collegeId
+      });
+  
+      await collegeDetails.save();
+      res.json({ message: 'College details created successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  });
 // Company details route
-app.post('/company/details/:companyId',upload.single('logo'), async (req, res) => {
-  const { state, city, description,mobile } = req.body;
+app.post('/company/details/:companyId', uploads.single('logo'), async (req, res) => {
+  const { state, city, description, mobile } = req.body;
   const { companyId } = req.params;
 
   try {
+    // Upload the logo file to S3
+    const logoParams = {
+      Bucket: "uploadfiles200",
+      Key: `${Date.now()}_${req.file.originalname}`,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype, // Set Content-Type based on file type
+    };
+    const logoUploadResult = await s3.upload(logoParams).promise();
+
     const companyDetails = new CompanyDetails({
       state,
       city,
       description,
       mobile,
-      logo: req.file.filename,
+      logo: logoUploadResult.Location, // Save the S3 URL
       company: companyId
     });
+
     await companyDetails.save();
     res.json({ message: 'Company details created successfully' });
   } catch (error) {
-    res.status(500).json({ error:error});
+    res.status(500).json({ error: error });
   }
 });
 // Get details of a specific company
