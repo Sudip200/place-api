@@ -7,11 +7,16 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cors=require('cors');
 const path = require('path');
-const fs =require('fs')
+const fs =require('fs');
+const AWS =require('aws-sdk');
 // Set up the Express app
 const app = express();
 app.set('view engine','ejs');
 // Middleware
+const s3 =new AWS.S3({
+  accessKeyId:"AKIAUMZH7FQ4ID3PS7UF",
+  secretAccessKey:"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"
+})
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -41,8 +46,9 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + extname);
   }
 });
-
+const storages = multer.memoryStorage();
 // Create the Multer upload object
+const uploads=multer({storages});
 app.use(express.static(path.join(__dirname, 'public')));
 const upload = multer({ storage });
 const College = mongoose.model('College', new mongoose.Schema({
@@ -169,44 +175,63 @@ app.post('/company/register', async (req, res) => {
 });
 
   // College details route
-app.post('/college/details/:collegeId', upload.single('logo'), async (req, res) => {
-  const { state, city, description,mobile } = req.body;
-  const { collegeId } = req.params;
-
-  try {
-    const collegeDetails = new CollegeDetails({
-      state,
-      city,
-      description,
-      mobile,
-      logo: req.file.filename,
-      college: collegeId
-    });
-    await collegeDetails.save();
-    res.json({ message: 'College details created successfully' });
-  } catch (error) {
-    res.status(500).json({error:error });
-  }
-});
-
+  app.post('/college/details/:collegeId', uploads.single('logo'), async (req, res) => {
+    const { state, city, description, mobile } = req.body;
+    const { collegeId } = req.params;
+  
+    try {
+      // Upload the logo file to S3
+      const logoParams = {
+        Bucket: "uploadfiles200",
+        Key: `${Date.now()}_${req.file.originalname}`,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype, // Set Content-Type based on file type
+      };
+      const logoUploadResult = await s3.upload(logoParams).promise();
+  
+      const collegeDetails = new CollegeDetails({
+        state,
+        city,
+        description,
+        mobile,
+        logo: logoUploadResult.Location, // Save the S3 URL
+        college: collegeId
+      });
+  
+      await collegeDetails.save();
+      res.json({ message: 'College details created successfully' });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  });
 // Company details route
-app.post('/company/details/:companyId',upload.single('logo'), async (req, res) => {
-  const { state, city, description,mobile } = req.body;
+app.post('/company/details/:companyId', uploads.single('logo'), async (req, res) => {
+  const { state, city, description, mobile } = req.body;
   const { companyId } = req.params;
 
   try {
+    // Upload the logo file to S3
+    const logoParams = {
+      Bucket: "uploadfiles200",
+      Key: `${Date.now()}_${req.file.originalname}`,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype, // Set Content-Type based on file type
+    };
+    const logoUploadResult = await s3.upload(logoParams).promise();
+
     const companyDetails = new CompanyDetails({
       state,
       city,
       description,
       mobile,
-      logo: req.file.filename,
+      logo: logoUploadResult.Location, // Save the S3 URL
       company: companyId
     });
+
     await companyDetails.save();
     res.json({ message: 'Company details created successfully' });
   } catch (error) {
-    res.status(500).json({ error:error});
+    res.status(500).json({ error: error });
   }
 });
 // Get details of a specific company
@@ -294,38 +319,60 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-app.post('/register/:collegeId', upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'profile', maxCount: 1 }]), async (req, res) => {
-  try {
-    const { name, open, skill, email, password, mobile, description } = req.body;
-    const collegeId = req.params.collegeId;
-    const resumeData = req.files['resume'][0];
-    const profileData=req.files['profile'][0]
-     // The uploaded file information
-     
-     console.log(req.file)
-     console.log(req.body)
-    // Create a new student instance
-    const student = new Student({
-      name,
-      open,
-      college: collegeId,
-      skill,
-      email,
-      password,
-      mobile,
-      description,
-      resume:resumeData.filename,
-      profile:profileData.filename
-    });
+app.post(
+  "/register/:collegeId",
+  uploads.fields([{ name: "resume", maxCount: 1 }, { name: "profile", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const { name, open, skill, email, password, mobile, description } = req.body;
+      const collegeId = req.params.collegeId;
+      const resumeData = req.files["resume"][0];
+      const profileData = req.files["profile"][0];
 
-    // Save the student to the database
-    await student.save();
+      // Upload the resume file to S3
+      const resumeParams = {
+        Bucket: "uploadfiles200",
+        Key: `${Date.now()}_${resumeData.originalname}`,
+        ContentType: resumeData.mimetype,
+        Body: resumeData.buffer,
+      };
+      const resumeUploadResult = await s3.upload(resumeParams).promise();
 
-    res.status(201).json({ id:student._id});
-  } catch (error) {
-    res.status(500).json({ error: error });
+      // Upload the profile file to S3
+      const profileParams = {
+        Bucket: "uploadfiles200",
+        Key: `${Date.now()}_${profileData.originalname}`,
+        ContentType: profileData.mimetype,
+        Body: profileData.buffer,
+      };
+      const profileUploadResult = await s3.upload(profileParams).promise();
+
+      console.log(resumeUploadResult);
+      console.log(profileUploadResult);
+
+      // Create a new student instance
+      const student = new Student({
+        name,
+        open,
+        college: collegeId,
+        skill,
+        email,
+        password,
+        mobile,
+        description,
+        resume: resumeUploadResult.Location, // Save the S3 URL
+        profile: profileUploadResult.Location, // Save the S3 URL
+      });
+
+      // Save the student to the database
+      await student.save();
+
+      res.status(201).send('Registration Successful');
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
   }
-});
+);
 app.post('/login/:collegeId', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -360,6 +407,7 @@ app.get('/register/:collegeId', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+
 app.get('/allstudents',async (req,res)=>{
  try{
    const students=await Student.find({}).populate('college');
