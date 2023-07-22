@@ -10,7 +10,7 @@
   <div class="container">
     <h3>Student Registration Form</h3>
     <p>College: <%= college.college.name %></p>
-    <img src="/uploads/<%= college.logo %>" alt="College Logo" width="100" height="100">
+    <img src="<%= college.logo %>" alt="College Logo" width="100" height="100">
     <form action="/register/<%= collegeId %>" method="POST" enctype="multipart/form-data">
 
       <label for="name">Name:</label>
