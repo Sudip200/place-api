@@ -410,12 +410,36 @@ app.get('/', (req, res) => {
 
 app.get('/allstudents',async (req,res)=>{
  try{
-   const students=await Student.find({}).populate('college');
+   const students=await Student.find({}).sort({skill:-1}).populate('college');
    res.json(students);
  }catch(err){
 
  }
 })
+app.post('/sendmsg', async (req, res) => {
+  const { message, college, company } = req.body;
+  console.log(req.body);
+  try {
+    const newMessage = new Message({ message: message, college: college, company: company });
+    await newMessage.save();
+    res.json({ msg: 'sent' });
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+app.post('/getmsg',async (req,res)=>{
+  const {college,company}=req.body;
+  try{
+    const message= await Message.find({college:college,company:company}).sort({ timestamp: 1 })
+    res.json(message)
+  }catch(err){
+    res.json(err);
+  }
+})
+
+
+
 
 // Start the server
 const port = 3000;
