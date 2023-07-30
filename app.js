@@ -437,8 +437,26 @@ app.post('/getmsg',async (req,res)=>{
     res.json(err);
   }
 })
+app.post('/contactedcol',async (req,res)=>{
+  const {company}=req.body;
+  try{
+      const messages= await Message.find({company:company}).populate('college').distinct('college');
+    
+      res.json(messages);
+  }catch(err){
+    res.json(err);
+  }
+})
 
-
+app.post('/contactedcom',async (req,res)=>{
+  const {college}=req.body;
+  try{
+      const messages= await Message.find({college:college}).populate('company').distinct('company');
+      res.json(messages);
+  }catch(err){
+    res.json(err);
+  }
+})
 
 
 // Start the server
