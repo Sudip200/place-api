@@ -237,14 +237,20 @@ app.post('/company/details/:companyId', uploads.single('logo'), async (req, res)
 // Get details of a specific company
 app.get('/company/details/:companyId', async (req, res) => {
   const { companyId } = req.params;
-   console.log(companyId)
+  const {authorization}=req.headers;
+
   try {
-    const companyDetails = await CompanyDetails.findOne({ company: companyId }).populate('company');
-    if (!companyDetails) {
-      res.status(404).json({ error: 'Company details not found' });
-      return;
+    if(authorization==='XXLPNK'){
+      const companyDetails = await CompanyDetails.findOne({ company: companyId }).populate('company');
+      if (!companyDetails) {
+        res.status(404).json({ error: 'Company details not found' });
+        return;
+      }
+      res.json(companyDetails);
+    }else{
+      res.json("auth failed")
     }
-    res.json(companyDetails);
+  
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -253,14 +259,19 @@ app.get('/company/details/:companyId', async (req, res) => {
 // Get details of a specific college
 app.get('/college/details/:collegeId', async (req, res) => {
   const { collegeId } = req.params;
-
+  const {authorization}=req.headers;
   try {
-    const collegeDetails = await CollegeDetails.findOne({ college: collegeId }).populate('college');
-    if (!collegeDetails) {
-      res.status(404).json({ error: 'College details not found' });
-      return;
+    if(authorization==='XXLPNK'){
+      const collegeDetails = await CollegeDetails.findOne({ college: collegeId }).populate('college');
+      if (!collegeDetails) {
+        res.status(404).json({ error: 'College details not found' });
+        return;
+      }
+      res.json(collegeDetails);
+    }else{
+      res.json("auth failed")
     }
-    res.json(collegeDetails);
+    
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -268,9 +279,15 @@ app.get('/college/details/:collegeId', async (req, res) => {
 
 // Get all company details
 app.get('/company/details', async (req, res) => {
+  const {authorization}=req.headers;
   try {
-    const companyDetails = await CompanyDetails.find().populate('company');
-    res.json(companyDetails);
+    if(authorization==='XXLPNK'){
+      const companyDetails = await CompanyDetails.find().populate('company');
+      res.json(companyDetails);
+    }else{
+      res.json("auth failed")
+    }
+   
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -278,9 +295,15 @@ app.get('/company/details', async (req, res) => {
 
 // Get all college details
 app.get('/college/details', async (req, res) => {
+  const {authorization}=req.headers;
   try {
-    const collegeDetails = await CollegeDetails.find().populate('college');
-    res.json(collegeDetails);
+    if(authorization==='XXLPNK'){
+      const collegeDetails = await CollegeDetails.find().populate('college');
+      res.json(collegeDetails);
+    }else{
+      res.json("auth failed")
+    }
+   
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -409,11 +432,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/allstudents',async (req,res)=>{
+  const {authorization}=req.headers;
  try{
-   const students=await Student.find({}).sort({skill:-1}).populate('college');
-   res.json(students);
+  if(authorization==='XXLPNK'){
+    const students=await Student.find({}).sort({skill:-1}).populate('college');
+    res.json(students);
+  }else{
+    res.json("auth failed")
+  }
+  
  }catch(err){
-
+   res.json(err)
  }
 })
 app.post('/sendmsg', async (req, res) => {
@@ -457,6 +486,7 @@ app.post('/contactedcom',async (req,res)=>{
     res.json(err);
   }
 })
+
 
 
 // Start the server
