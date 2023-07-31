@@ -486,6 +486,110 @@ app.post('/contactedcom',async (req,res)=>{
     res.json(err);
   }
 })
+app.post('/filtercompany',async (req,res)=>{
+  const {state,city}=req.body;
+  try{
+   const companise=await CompanyDetails.find({state:state,city:city}).populate('company');
+   res.json(companise)
+  }catch(err){
+ res.json(err);
+  }
+} )
+app.post('/filtercollege',async (req,res)=>{
+  const {state,city}=req.body;
+  try{
+   const companise=await CollegeDetails.find({state:state,city:city}).populate('college');
+   res.json(companise)
+  }catch(err){
+ res.json(err);
+  }
+} )
+app.get('/searchcolname',async (req, res) => {
+  const keyword = req.query.keyword;
+  const {authorization}=req.headers;
+  try {
+    const colleges = await CollegeDetails.aggregate([
+      {
+        $lookup: {
+          from: 'colleges', // Collection name of the associated College model
+          localField: 'college',
+          foreignField: '_id',
+          as: 'college',
+        },
+      },
+      {
+        $unwind: '$college',
+      },
+      {
+        $match: {
+          $or: [
+            { state: { $regex: keyword, $options: 'i' } },
+            { city: { $regex: keyword, $options: 'i' } },
+            { description: { $regex: keyword, $options: 'i' } },
+            { 'college.name': { $regex: keyword, $options: 'i' } },
+          ],
+        },
+      },
+    ]);
+
+    res.json(colleges);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Failed to fetch colleges' ,error});
+  }
+})
+app.get('/searchcomname',async (req, res) => {
+  const keyword = req.query.keyword;
+  const {authorization}=req.headers;
+  try {
+    const companies = await CompanyDetails.aggregate([
+      {
+        $lookup: {
+          from: 'companies', // Collection name of the associated Company model
+          localField: 'company',
+          foreignField: '_id',
+          as: 'company',
+        },
+      },
+      {
+        $unwind: '$company',
+      },
+      {
+        $match: {
+          $or: [
+            { state: { $regex: keyword, $options: 'i' } },
+            { city: { $regex: keyword, $options: 'i' } },
+            { description: { $regex: keyword, $options: 'i' } },
+            { 'company.name': { $regex: keyword, $options: 'i' } },
+          ],
+        },
+      },
+    ]);
+
+    res.json(companies);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Failed to fetch colleges' ,error});
+  }
+})
+app.get('/filterstu',async (req,res)=>{
+  const keyword = req.query.keyword;
+  const {authorization}=req.headers;
+  try {
+    const students = await Student.find({
+      $or: [
+        { name: { $regex: keyword, $options: 'i' } },
+        { skill: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+      ],
+    }).populate('college');
+
+    res.json(students);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Failed to fetch students' });
+  }
+})
 
 
 
