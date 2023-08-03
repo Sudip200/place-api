@@ -9,9 +9,11 @@ const cors=require('cors');
 const path = require('path');
 const fs =require('fs');
 const AWS =require('aws-sdk');
+const nodemailer =require('nodemailer');
 // Set up the Express app
 const app = express();
 app.set('view engine','ejs');
+
 // Middleware
 const s3 =new AWS.S3({
   accessKeyId:"AKIAUMZH7FQ4ID3PS7UF",
@@ -26,7 +28,15 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-
+const transporter = nodemailer.createTransport({
+  host: 'smtp-relay.sendinblue.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'dassudipto200@gmail.com',
+    pass: 'mpJCFfSGcZKE2bkT',
+  },
+});
 // Connect to MongoDB using Mongoose
 mongoose.connect('mongodb+srv://dassudipto200:B8sRC8IqhLHvJzP2@cluster0.c0ugejs.mongodb.net/?retryWrites=true&w=majority', {
   useNewUrlParser: true,
@@ -447,10 +457,77 @@ app.get('/allstudents',async (req,res)=>{
 })
 app.post('/sendmsg', async (req, res) => {
   const { message, college, company } = req.body;
-  console.log(req.body);
   try {
     const newMessage = new Message({ message: message, college: college, company: company });
     await newMessage.save();
+    const companyemail= await Company.findById(company);
+    const collegeemail=await College.findById(college);
+    const mailOptions = {
+      from: 'dassudipto200@gmail.com',
+      to: `${companyemail.email},${collegeemail.email}`,
+      subject: "You have new message",
+      html: `<!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+          }
+      
+          h2 {
+            color: #007BFF;
+            margin-bottom: 10px;
+          }
+      
+          p {
+            margin: 5px 0;
+          }
+      
+          strong {
+            font-weight: bold;
+          }
+      
+          .container {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+      
+          .message-box {
+            background-color: #dcdcdc;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+          }
+      
+          .signature {
+            font-style: italic;
+            color: #555555;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>You have a new message</h2>
+          <div class="message-box">
+            <p><strong>Message:</strong> "${message}"</p>
+          </div>
+          <p>between ${companyemail.name} and ${collegeemail.name}</p>
+          <p>Please check the chat section in your app.</p>
+        </div>
+        <p class="signature">Thanks,<br>CollegeHire</p>
+      </body>
+      </html>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+   // res.json({ message: 'Email sent', response: info.response });
     res.json({ msg: 'sent' });
   } catch (err) {
     res.json(err);
@@ -470,7 +547,6 @@ app.post('/contactedcol',async (req,res)=>{
   const {company}=req.body;
   try{
       const messages= await Message.find({company:company}).populate('college').distinct('college');
-    
       res.json(messages);
   }catch(err){
     res.json(err);
@@ -590,6 +666,32 @@ app.get('/filterstu',async (req,res)=>{
     res.status(500).json({ success: false, error: 'Failed to fetch students' });
   }
 })
+app.post('/sendemail', async (req, res) => {
+  const {recep,sender,body,subject}=req.body;
+  const transporter = nodemailer.createTransport({
+    host: 'smtp-relay.sendinblue.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'dassudipto200@gmail.com',
+      pass: 'mpJCFfSGcZKE2bkT',
+    },
+  });
+
+  try {
+    const mailOptions = {
+      from: sender,
+      to: recep,
+      subject: subject,
+      text: body,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    res.json({ message: 'Email sent', response: info.response });
+  } catch (error) {
+    res.json({ error: 'Error sending email', message: error.message });
+  }
+});
 
 
 
