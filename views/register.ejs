@@ -17,7 +17,7 @@
       <input type="text" id="name" name="name" required>
       <label for="profile">Profile Pic</label>
       <input type="file" id="name" name="profile" required accept=".jpg,.png,.jpeg">
-      <label for="open">Open to jobs ?:</label>
+      <label for="open">Ready to interview ?:</label>
       <input type="checkbox" id="open" name="open">
       <label for="skill">Skills (comma-separated):</label>
       <input type="text" id="skill" name="skill" required>
@@ -25,17 +25,67 @@
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" required>
       
-      <label for="password">Password:</label>
+      <label for="password">Create Password:</label>
       <input type="password" id="password" name="password" required>
       
       <label for="mobile">Mobile:</label>
       <input type="text" id="mobile" name="mobile">
-      
       <label for="description">Description:Your Bio</label>
       <textarea id="description" name="description"></textarea>
-     
+      <label for="description">Your preferred role</label>
+
+      <select id="roles" name="role">
+        <!-- Tech Roles -->
+        <option value="Full Stack Developer">Full Stack Developer</option>
+        <option value="Frontend Developer">Frontend Developer</option>
+        <option value="Backend Developer">Backend Developer</option>
+        <option value="Mobile App Developer">Mobile App Developer</option>
+        <option value="Data Scientist">Data Scientist</option>
+        <option value="UI/UX Designer">UI/UX Designer</option>
+        <option value="Software Engineer">Software Engineer</option>
+        <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+        <option value="Cloud Solutions Architect">Cloud Solutions Architect</option>
+        <option value="DevOps Engineer">DevOps Engineer</option>
+        <option value="Network Administrator">Network Administrator</option>
+        <option value="Database Administrator">Database Administrator</option>
+        <option value="Game Developer">Game Developer</option>
+        <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+        <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+        <option value="Artificial Intelligence Specialist">Artificial Intelligence Specialist</option>
+        <option value="Robotics Engineer">Robotics Engineer</option>
+        <option value="Blockchain Developer">Blockchain Developer</option>
+        <option value="Quality Assurance Engineer">Quality Assurance Engineer</option>
+        <option value="Systems Analyst">Systems Analyst</option>
+        <option value="Network Security Specialist">Network Security Specialist</option>
+    
+        <!-- Non-Tech Roles -->
+        <option value="Project Manager">Project Manager</option>
+        <option value="Marketing Specialist">Marketing Specialist</option>
+        <option value="Human Resources Manager">Human Resources Manager</option>
+        <option value="Business Analyst">Business Analyst</option>
+        <option value="Financial Analyst">Financial Analyst</option>
+        <option value="Sales Representative">Sales Representative</option>
+        <option value="Content Writer">Content Writer</option>
+        <option value="Graphic Designer">Graphic Designer</option>
+        <option value="Customer Support Specialist">Customer Support Specialist</option>
+        <option value="Operations Manager">Operations Manager</option>
+        <option value="Supply Chain Manager">Supply Chain Manager</option>
+        <option value="Public Relations Specialist">Public Relations Specialist</option>
+        <option value="Technical Writer">Technical Writer</option>
+        <option value="Event Planner">Event Planner</option>
+        <option value="Accountant">Accountant</option>
+        <option value="Data Analyst">Data Analyst</option>
+        <option value="Market Research Analyst">Market Research Analyst</option>
+        <option value="Logistics Coordinator">Logistics Coordinator</option>
+        <option value="Executive Assistant">Executive Assistant</option>
+        <option value="Translator">Translator</option>
+    
+        <!-- Other Role Option -->
+        <option value="Other">Other</option>
+    </select>
+    
       <label for="resume">Resume:</label>
-      <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx">
+      <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
       
       <button type="submit">Register</button>
     </form>

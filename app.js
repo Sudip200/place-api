@@ -113,12 +113,20 @@ const StudentSchema = new mongoose.Schema({
   skill: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
+  role: { type: String, required: true },
   mobile: { type: Number, required: false },
   description: { type: String, required: false },
   resume: {required:true,type:String  }
 });
 const Student = mongoose.model('Student', StudentSchema);
-
+const PostSchema=new mongoose.Schema({
+  content:{required:true,type:String},
+  photo:{required:false,type:String},
+  video:{required:false,type:String},
+  user:{type:mongoose.Schema.Types.ObjectId,required:true},
+  usertype:{type:String,required:true}
+},{timestamps:true})
+const Post =mongoose.model('Post',PostSchema)
   // College login route
 app.post('/college/login', async (req, res) => {
   const { email, password } = req.body;
@@ -357,7 +365,7 @@ app.post(
   uploads.fields([{ name: "resume", maxCount: 1 }, { name: "profile", maxCount: 1 }]),
   async (req, res) => {
     try {
-      const { name, open, skill, email, password, mobile, description } = req.body;
+      const { name, open, skill, email, password, mobile, description,role } = req.body;
       const collegeId = req.params.collegeId;
       const resumeData = req.files["resume"][0];
       const profileData = req.files["profile"][0];
@@ -392,6 +400,7 @@ app.post(
         email,
         password,
         mobile,
+        role,
         description,
         resume: resumeUploadResult.Location, // Save the S3 URL
         profile: profileUploadResult.Location, // Save the S3 URL
@@ -455,6 +464,7 @@ app.get('/allstudents',async (req,res)=>{
    res.json(err)
  }
 })
+
 app.post('/sendmsg', async (req, res) => {
   const { message, college, company } = req.body;
   try {
