@@ -1,0 +1,11 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.college.hire",
+        "sha256_cert_fingerprints":
+          ["30:0C:5C:68:C8:8A:C6:05:B3:E4:A5:DA:5F:E5:3A:2F:A9:CE:C7:04:87:0D:27:F9:56:3C:E3:43:7B:88:98:F6"]
+      }
+    }
+  ]
