@@ -123,10 +123,10 @@ const PostSchema=new mongoose.Schema({
   content:{required:true,type:String},
   photo:{required:false,type:String},
   video:{required:false,type:String},
-  user:{type:mongoose.Schema.Types.ObjectId,required:true},
-  usertype:{type:String,required:true}
+  user:{type:mongoose.Schema.Types.ObjectId,required:true,ref:'Student'},
 },{timestamps:true})
 const Post =mongoose.model('Post',PostSchema)
+
   // College login route
 app.post('/college/login', async (req, res) => {
   const { email, password } = req.body;
@@ -667,6 +667,8 @@ app.get('/filterstu',async (req,res)=>{
         { name: { $regex: keyword, $options: 'i' } },
         { skill: { $regex: keyword, $options: 'i' } },
         { description: { $regex: keyword, $options: 'i' } },
+        { role: { $regex: keyword, $options: 'i' } }
+
       ],
     }).populate('college');
 
@@ -702,8 +704,44 @@ app.post('/sendemail', async (req, res) => {
     res.json({ error: 'Error sending email', message: error.message });
   }
 });
-
-
+app.post('/stdetails', async (req, res) => {
+  
+  try {
+    const { studentId } = req.body;
+    console.log(studentId)
+    const student = await Student.findById(studentId).populate('college');
+    
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    res.status(200).json(student);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+})
+app.post('/stlogin',async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const student = await Student.findOne({ email, password });
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    res.status(200).json(student._id);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+app.post('/createpost',upload.single('file'),async (req,res)=>{
+  const {id,content}=req.body;
+  const file=req.file;
+  try{
+     const post =new Post({content:content,user:id,photo:file});
+    await  post.save();
+    res.json('uploaded');
+  }catch(error){
+    res.json(error);
+  }
+})
 
 // Start the server
 const port = 3000;
