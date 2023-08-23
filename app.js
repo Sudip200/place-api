@@ -122,7 +122,8 @@ const Student = mongoose.model('Student', StudentSchema);
 const PostSchema=new mongoose.Schema({
   content:{required:true,type:String},
   photo:{required:false,type:String},
-  video:{required:false,type:String},
+  type:{required:false,type:String},
+
   user:{type:mongoose.Schema.Types.ObjectId,required:true,ref:'Student'},
 },{timestamps:true})
 const Post =mongoose.model('Post',PostSchema)
@@ -732,7 +733,7 @@ app.post('/stlogin',async (req, res) => {
   }
 })
 app.post('/createpost',uploads.single('file'),async (req,res)=>{
-  const {id,content}=req.body;
+  const {id,content,type}=req.body;
   const file=req.file;
   try{
     const photoParams = {
@@ -742,7 +743,7 @@ app.post('/createpost',uploads.single('file'),async (req,res)=>{
       ContentType: req.file.mimetype, // Set Content-Type based on file type
     };
     const logoUploadResult = await s3.upload(photoParams).promise();
-    const post =new Post({content:content,user:id,photo:logoUploadResult.Location});
+    const post =new Post({content:content,user:id,photo:logoUploadResult.Location,type:type});
     await  post.save();
     res.json('uploaded');
   }catch(error){
