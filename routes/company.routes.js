@@ -15,16 +15,16 @@ const auth = require('../middlewares/auth.middlewares');
 const { upload } = require('../config/multer.config');
 
 // Public routes
-router.post('/company/register', companyRegister);
-router.post('/company/login', companyLogin);
+router.post('/register', companyRegister);
+router.post('/login', companyLogin);
 
 // Protected routes
-router.post('/company/details/:companyId', auth, upload.single('logo'), getCompanyDetails);
-router.get('/company/:companyId', auth, getSpecificCompanyDetails);
-router.get('/company', auth, getAllCompanyDetails);
+router.post('/details/:companyId', auth, upload.single('logo'), getCompanyDetails);
+router.get('/:companyId', auth, getSpecificCompanyDetails);
+router.get('', auth, getAllCompanyDetails);
 
-router.post('/company/contact', auth, contactCompany);
-router.post('/company/filter', auth, filtercompany);
-router.get('/company/search', auth, searchCompany);
+router.post('/contact', auth, contactCompany);
+router.post('/filter', auth, filtercompany);
+router.get('/search', auth, searchCompany);
 
 module.exports = router;

@@ -10,9 +10,9 @@ router.get('/',(req,res)=>{
     })
 })
 
-router.use(studentRoutes);
-router.use(collegeRoutes);
-router.use(postRoutes);
-router.use(companyRoutes);
+router.use('/student',studentRoutes);
+router.use('/college',collegeRoutes);
+router.use('/post',postRoutes);
+router.use('/company',companyRoutes);
 
 module.exports=router;

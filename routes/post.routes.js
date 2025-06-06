@@ -12,11 +12,11 @@ const auth = require('../middlewares/auth.middlewares');
 const { createPost, allPosts } = require('../controllers/post.controller');
 
 // Protected routes for messaging
-router.post('/post/message', auth, postMessage);
-router.get('/post/messages', auth, getMessages);
-router.post('/post/sendmessage', auth, sendMessageBtw);
-router.post('/post/allmessages', auth, getMessagesAll);
-router.post('/post/create-post',auth,createPost)
-router.get('/post/all-posts',auth,allPosts)
+router.post('/message', auth, postMessage);
+router.get('/messages', auth, getMessages);
+router.post('/sendmessage', auth, sendMessageBtw);
+router.post('/allmessages', auth, getMessagesAll);
+router.post('/create-post',auth,createPost)
+router.get('/all-posts',auth,allPosts)
 
 module.exports = router;
