@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const AWS = require('aws-sdk');
 const s3 = require('../config/aws.config');
 const nodemailer = require('nodemailer');
-const { generateToken } = require('../utils/jwt.util');
+const {verifyToken  ,genarateToken } = require('../utils/jwt.util');
 const { hashPassword, comparePassword } = require('../utils/hash.util');
 
 // LOGIN
@@ -19,8 +19,8 @@ const collegeLogin = async (req, res) => {
     if (!college || !isSamePassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    const token = generateToken({ id: college._id });
-    res.json({ message: 'logged in', token });
+    const token = genarateToken({ id: college._id });
+    res.json({ message: 'logged in', token ,id:college._id });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -38,11 +38,11 @@ const registerCollege = async (req, res) => {
     }
     const hashedPassword = await hashPassword(password);
 
-    const college = new College({ name, email, password:hashedPassword });
+    const college = new College({ name, email, password:hashedPassword});
     await college.save();
 
-    const token = generateToken({ id: college._id });
-    res.json({ message: 'registered', token });
+    const token = genarateToken({ id: college._id });
+    res.json({ message: 'registered', token ,id:college._id });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -97,11 +97,14 @@ const getSpecificCollegeDetails = async (req, res) => {
 
 // GET ALL COLLEGE DETAILS
 const getAllCollegeDetails = async (req, res) => {
+  console.log(req.user)
   try {
     const collegeDetails = await CollegeDetails.find().populate('college');
+    console.log(collegeDetails)
     res.json(collegeDetails);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+   console.log('all-college',error)
+    res.status(500).json({ error: 'Internal server error' ,details:error});
   }
 };
 

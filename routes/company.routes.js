@@ -20,8 +20,8 @@ router.post('/login', companyLogin);
 
 // Protected routes
 router.post('/details/:companyId', auth, upload.single('logo'), getCompanyDetails);
-router.get('/:companyId', auth, getSpecificCompanyDetails);
-router.get('', auth, getAllCompanyDetails);
+router.get('/details/:companyId', auth, getSpecificCompanyDetails);
+router.get('/get-all', auth, getAllCompanyDetails);
 
 router.post('/contact', auth, contactCompany);
 router.post('/filter', auth, filtercompany);

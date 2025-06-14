@@ -21,9 +21,10 @@ router.post('/login', collegeLogin);
 router.post('/register', registerCollege);
 
 // Protected
+router.get('/details', auth, getAllCollegeDetails);
 router.post('/details/:collegeId', auth, upload.single('logo'), getCollegeDetails);
 router.get('/:collegeId', auth, getSpecificCollegeDetails);
-router.get('', auth, getAllCollegeDetails);
+
 
 router.get('/check/:collegeId', checkCollege);
 router.post('/contact', auth, contactCollege);

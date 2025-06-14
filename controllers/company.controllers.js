@@ -16,7 +16,7 @@ const companyRegister = async (req, res) => {
     const company = new Company({ name, email, password: hashedPassword });
     await company.save();
 
-    const token = jwt.sign({ id: company._id }, 'sudipto', { expiresIn: '8h' });
+    const token = jwt.sign({ id: company._id }, 'sudi234n%dn32dn', { expiresIn: '8h' });
 
     res.status(201).json({ message: 'Company registered successfully', token, id: company._id });
   } catch (error) {
@@ -24,20 +24,21 @@ const companyRegister = async (req, res) => {
   }
 };
 
-// LOGIN
 const companyLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
     const company = await Company.findOne({ email });
+    console.log(company);
     if (!company) return res.status(401).json({ error: 'Invalid credentials' });
     console.log(company);
     const isMatch = await comparePassword(password, company.password);
+    console.log(isMatch)
     if (!isMatch) return res.status(401).json({ error: 'Incorrect password' });
-
-    const token = jwt.sign({ id: company._id }, 'sudipto', { expiresIn: '8h' });
+    const token = jwt.sign({ id: company._id }, 'sudi234n%dn32dn', { expiresIn: '8h' });
 
     res.json({ message: 'Login successful', token, id: company._id });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -93,6 +94,7 @@ const getAllCompanyDetails = async (req, res) => {
     const allDetails = await CompanyDetails.find().populate('company');
     res.json(allDetails);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Internal server error' });
   }
 };
